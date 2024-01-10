@@ -1,0 +1,349 @@
+#include <FastLED.h>
+#include "MIDIUSB.h"
+
+#define NUM_LEDS 300
+#define LED_PIN 6
+#define starRate 10    // Milliseconds between star creations
+#define decayRate 5   // Milliseconds between brightness decay
+
+uint32_t zerotime = millis();
+
+bool fade = true;
+bool randColor = false;
+int color = 0;
+
+DEFINE_GRADIENT_PALETTE (heatmap_gp) {
+    0, 255,   0, 234,
+   41, 143,   0, 255,
+   89,   0, 212, 255,
+  153,   0, 255, 173,
+  217, 255, 255, 255,
+  255, 255,   0, 234,
+};
+
+CRGBPalette16 myPal = heatmap_gp;
+
+CRGB leds[NUM_LEDS];
+CRGB brightnessSubtractor;
+
+enum EffectMode { NONE, WAVE, WAVE2, STARS, PULSE, FALL };
+EffectMode currentMode = STARS;
+
+unsigned long lastStarTime = 0;
+unsigned long lastDecayTime = 0;
+
+void setup() {
+  FastLED.addLeds<WS2812B, LED_PIN, GRB>(leds, NUM_LEDS);
+  FastLED.setBrightness(255);
+  brightnessSubtractor = CHSV(0, 0, 5);  // Adjust the brightness subtraction value as needed
+  lastStarTime = millis();
+  lastDecayTime = millis();
+}
+
+void twinklingStars() {
+  // Twinkling stars
+
+  if (millis() - lastStarTime >= starRate) {
+    leds[random(NUM_LEDS)] = CHSV(random(190, 220), random(0, 120), 255); // Create white stars
+    lastStarTime = millis();
+  }
+
+  // Decay brightness
+  if (millis() - lastDecayTime >= decayRate) {
+    for (int i = 0; i < NUM_LEDS; i++) {
+      leds[i] -= brightnessSubtractor;
+    }
+    lastDecayTime = millis();
+  }
+}
+
+void fallingStars() {
+  // Twinkling stars
+
+    for (int i = NUM_LEDS - 1; i > 0; i--) {
+    leds[i] = leds[i - 1];
+  }
+
+  if (millis() - lastStarTime >= starRate) {
+    leds[random(NUM_LEDS)] = CHSV(random(190, 220), random(0, 120), 255); // Create white stars
+    lastStarTime = millis();
+  }
+
+  // Decay brightness
+  if (millis() - lastDecayTime >= decayRate) {
+    for (int i = 0; i < NUM_LEDS; i++) {
+      leds[i] -= brightnessSubtractor;
+    }
+    lastDecayTime = millis();
+  }
+}
+
+void waveEffect() {
+  uint8_t sinbeat1 = map(beat8(14, zerotime), 0, 255, 0, 99);
+  leds[sinbeat1] = CRGB::White;
+  fadeToBlackBy(leds, NUM_LEDS, 1);
+  uint16_t sinbeat2 = map(beat8(14, zerotime + 200), 0, 255, 99, 199);
+  leds[sinbeat2] = CRGB::White;
+  fadeToBlackBy(leds, NUM_LEDS, 1);
+  uint16_t sinbeat3 = map(beat8(14, zerotime + 400), 0, 255, 199, 299);
+  leds[sinbeat3] = CRGB::White;
+  fadeToBlackBy(leds, NUM_LEDS, 1);
+
+  uint8_t sinbeat4 = map(beat8(14, zerotime + 1000), 0, 255, 0, 99);
+  leds[sinbeat4] = CRGB::White;
+  fadeToBlackBy(leds, NUM_LEDS, 1);
+  uint16_t sinbeat5 = map(beat8(14, zerotime + 1200), 0, 255, 99, 199);
+  leds[sinbeat5] = CRGB::White;
+  fadeToBlackBy(leds, NUM_LEDS, 1);
+  uint16_t sinbeat6 = map(beat8(14, zerotime + 1400), 0, 255, 199, 299);
+  leds[sinbeat6] = CRGB::White;
+  fadeToBlackBy(leds, NUM_LEDS, 1);
+
+  uint8_t sinbeat7 = map(beat8(14, zerotime + 2000), 0, 255, 0, 99);
+  leds[sinbeat7] = CRGB::White;
+  fadeToBlackBy(leds, NUM_LEDS, 1);
+  uint16_t sinbeat8 = map(beat8(14, zerotime + 2200), 0, 255, 99, 199);
+  leds[sinbeat8] = CRGB::White;
+  fadeToBlackBy(leds, NUM_LEDS, 1);
+  uint16_t sinbeat9 = map(beat8(14, zerotime + 2400), 0, 255, 199, 299);
+  leds[sinbeat9] = CRGB::White;
+  fadeToBlackBy(leds, NUM_LEDS, 1);
+
+  uint8_t sinbeat10 = map(beat8(14, zerotime + 3000), 0, 255, 0, 99);
+  leds[sinbeat10] = CRGB::White;
+  fadeToBlackBy(leds, NUM_LEDS, 1);
+  uint16_t sinbeat11 = map(beat8(14, zerotime + 3200), 0, 255, 99, 199);
+  leds[sinbeat11] = CRGB::White;
+  fadeToBlackBy(leds, NUM_LEDS, 1);
+  uint16_t sinbeat12 = map(beat8(14, zerotime + 3400), 0, 255, 199, 299);
+  leds[sinbeat12] = CRGB::White;
+  fadeToBlackBy(leds, NUM_LEDS, 1);
+}
+
+void waveEffect2() {
+  uint8_t sinbeat1 = map(beat8(14, zerotime + 3400), 0, 255, 0, 99);
+  leds[sinbeat1] = CRGB::White;
+  fadeToBlackBy(leds, NUM_LEDS, 1);
+  uint16_t sinbeat2 = map(beat8(14, zerotime + 3200), 0, 255, 99, 199);
+  leds[sinbeat2] = CRGB::White;
+  fadeToBlackBy(leds, NUM_LEDS, 1);
+  uint16_t sinbeat3 = map(beat8(14, zerotime +3000), 0, 255, 199, 299);
+  leds[sinbeat3] = CRGB::White;
+  fadeToBlackBy(leds, NUM_LEDS, 1);
+
+  uint8_t sinbeat4 = map(beat8(14, zerotime + 2400), 0, 255, 0, 99);
+  leds[sinbeat4] = CRGB::White;
+  fadeToBlackBy(leds, NUM_LEDS, 1);
+  uint16_t sinbeat5 = map(beat8(14, zerotime + 2200), 0, 255, 99, 199);
+  leds[sinbeat5] = CRGB::White;
+  fadeToBlackBy(leds, NUM_LEDS, 1);
+  uint16_t sinbeat6 = map(beat8(14, zerotime + 2000), 0, 255, 199, 299);
+  leds[sinbeat6] = CRGB::White;
+  fadeToBlackBy(leds, NUM_LEDS, 1);
+
+  uint8_t sinbeat7 = map(beat8(14, zerotime + 1400), 0, 255, 0, 99);
+  leds[sinbeat7] = CRGB::White;
+  fadeToBlackBy(leds, NUM_LEDS, 1);
+  uint16_t sinbeat8 = map(beat8(14, zerotime + 1200), 0, 255, 99, 199);
+  leds[sinbeat8] = CRGB::White;
+  fadeToBlackBy(leds, NUM_LEDS, 1);
+  uint16_t sinbeat9 = map(beat8(14, zerotime + 1000), 0, 255, 199, 299);
+  leds[sinbeat9] = CRGB::White;
+  fadeToBlackBy(leds, NUM_LEDS, 1);
+
+  uint8_t sinbeat10 = map(beat8(14, zerotime + 400), 0, 255, 0, 99);
+  leds[sinbeat10] = CRGB::White;
+  fadeToBlackBy(leds, NUM_LEDS, 1);
+  uint16_t sinbeat11 = map(beat8(14, zerotime + 200), 0, 255, 99, 199);
+  leds[sinbeat11] = CRGB::White;
+  fadeToBlackBy(leds, NUM_LEDS, 1);
+  uint16_t sinbeat12 = map(beat8(14, zerotime), 0, 255, 199, 299);
+  leds[sinbeat12] = CRGB::White;
+  fadeToBlackBy(leds, NUM_LEDS, 1);
+}
+
+void pulseEffect() {
+      fill_solid(leds, 300, CHSV(100,10,beatsin8(27, 35, 255 ,zerotime, 0)));
+}
+
+void loop() {
+
+  midiEventPacket_t rx;
+  rx = MidiUSB.read();
+
+
+  if (fade == true){
+  EVERY_N_MILLISECONDS (5){
+    fadeToBlackBy (leds, 300, 25);
+  }
+}
+
+
+
+
+// color picker ---------------------------------------------------------------------------------------------
+
+// FIXED
+
+if (rx.header == 9 && rx.byte2 == 48 && rx.byte1 == 145){     // PINK
+  color = 0;
+}
+if (rx.header == 9 && rx.byte2 == 49 && rx.byte1 == 145){     // PURPLE
+  color = 41;
+}
+if (rx.header == 9 && rx.byte2 == 50 && rx.byte1 == 145){     // LIGHT BLUE
+  color = 89;
+}
+if (rx.header == 9 && rx.byte2 == 51 && rx.byte1 == 145){     // TURQUOISE
+  color = 153;
+}
+if (rx.header == 9 && rx.byte2 == 52 && rx.byte1 == 145){     // WHITE
+  color = 217;
+}
+if (rx.header == 9 && rx.byte2 == 53 && rx.byte1 == 145){     // PINK
+  color = 255;
+}
+
+// FINE
+
+if (rx.header == 9 && rx.byte2 == 56 && rx.byte1 == 145){
+  color = rx.byte3;
+}
+if (rx.header == 9 && rx.byte2 == 57 && rx.byte1 == 145){
+  color = rx.byte3 + 128;
+}
+
+// RANDOM
+
+if (rx.header == 9 && rx.byte2 == 58 && rx.byte1 == 145){
+  randColor = true;
+}
+if (rx.header == 9 && rx.byte2 == 59 && rx.byte1 == 145){
+  randColor = false;
+}
+
+// toggle fade ---------------------------------------------------------------------------------------------
+
+if (rx.header == 9 && rx.byte2 == 120){
+  fade = true;
+}
+if (rx.header == 9 && rx.byte2 == 121){
+  fade = false;
+}
+
+// Segments 5 LEDS new from 0 to 59 ( C-2 to H 2) ---------------------------------------------------------------------------------------------
+
+if (rx.header == 9 && rx.byte2 >= 0 && rx.byte2 <= 59 && rx.byte1 == 144){
+      if (randColor == true){
+      color = random(0, 255);
+    }
+    fill_palette(leds + (rx.byte2 * 5), 5, color, 0, myPal, 255, LINEARBLEND);
+    }
+       if (rx.header == 8 && rx.byte2 >= 0 && rx.byte2 <= 59 && rx.byte1 == 128 && !fade){
+          fill_solid(leds + (rx.byte2 * 5), 5, CRGB::Black);
+    }
+
+// Segments 10 LEDS new from 60 to 89 (C 3 to H 6) ---------------------------------------------------------------------------------------------
+
+if (rx.header == 9 && rx.byte2 >= 60 && rx.byte2 <= 89 && rx.byte1 == 144){
+    if (randColor == true){
+      color = random(0, 255);
+    }
+    fill_palette(leds + ((rx.byte2 - 60) * 10), 10, color, 0, myPal, 255, LINEARBLEND);
+    }
+       if (rx.header == 8 && rx.byte2 >= 60 && rx.byte2 <= 89 && rx.byte1 == 128 && !fade){
+          fill_solid(leds + ((rx.byte2 - 60) * 10), 10, CRGB::Black);
+    }
+
+
+
+
+// Segments 20 LEDS new from 90 to 104 (C 3 to H 6) ---------------------------------------------------------------------------------------------
+
+if (rx.header == 9 && rx.byte2 >= 90 && rx.byte2 <= 104 && rx.byte1 == 144){
+        if (randColor == true){
+      color = random(0, 255);
+    }
+    fill_palette(leds + ((rx.byte2 - 90) * 20), 20, color, 0, myPal, 255, LINEARBLEND);
+    }
+       if (rx.header == 8 && rx.byte2 >= 90 && rx.byte2 <= 104 && rx.byte1 == 128 && fade == false){
+          fill_solid(leds + ((rx.byte2 - 90) * 20), 20, CRGB::Black);
+    }
+
+// Segments 25 LEDS new from 105 to 116 (C 3 to H 6) ---------------------------------------------------------------------------------------------
+
+if (rx.header == 9 && rx.byte2 >= 105 && rx.byte2 <= 116 && rx.byte1 == 144){
+        if (randColor == true){
+      color = random(0, 255);
+    }
+    fill_palette(leds + ((rx.byte2 - 105) * 25), 25, color, 0, myPal, 255, LINEARBLEND);
+    }
+       if (rx.header == 8 && rx.byte2 >= 105 && rx.byte2 <= 116 && rx.byte1 == 128 && fade == false){
+          fill_solid(leds + ((rx.byte2 - 105) * 25), 25, CRGB::Black);
+    }
+
+// Segments 100 LEDS new from 117 to 119 (C 7 to H 7) ---------------------------------------------------------------------------------------------
+
+if (rx.header == 9 && rx.byte2 >= 117 && rx.byte2 <= 119 && rx.byte1 == 144){
+        if (randColor == true){
+      color = random(0, 255);
+    }
+    fill_palette(leds + ((rx.byte2 - 117) * 100), 100, color, 0, myPal, 255, LINEARBLEND);
+    }
+       if (rx.header == 8 && rx.byte2 >= 117 && rx.byte2 <= 119 && rx.byte1 == 128 && fade == false){
+         fill_solid(leds + ((rx.byte2 - 117) * 100), 100, CRGB::Black); 
+    }
+
+
+// Switch cases ---------------------------------------------------------------------------------------------
+
+if (rx.header == 9 && rx.byte2 == 60 && rx.byte1 == 145){
+  currentMode = NONE;
+}
+if (rx.header == 9 && rx.byte2 == 61 && rx.byte1 == 145){
+  currentMode = WAVE;
+}
+if (rx.header == 9 && rx.byte2 == 62 && rx.byte1 == 145){
+  currentMode = STARS;
+}
+if (rx.header == 9 && rx.byte2 == 63 && rx.byte1 == 145){
+  currentMode = PULSE;
+}
+if (rx.header == 9 && rx.byte2 == 64 && rx.byte1 == 145){
+  currentMode = FALL;
+}
+if (rx.header == 9 && rx.byte2 == 65 && rx.byte1 == 145){
+  currentMode = WAVE2;
+}
+
+  switch (currentMode) {
+    case WAVE:
+      waveEffect();
+      break;
+
+    case STARS:
+      twinklingStars();
+      break;
+
+    case PULSE:
+      pulseEffect();
+      break;
+
+    case NONE:
+      break;
+
+    case FALL:
+      fallingStars();
+      break;
+
+    case WAVE2:
+      waveEffect2();
+      break;
+    // Add other cases for different modes
+
+    default:
+      break;
+  }
+
+  FastLED.show();
+}
